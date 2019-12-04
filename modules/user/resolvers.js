@@ -11,6 +11,7 @@ import {
   USERNAME_ALREADY_EXISTS,
   USER_NOT_FOUND,
   USER_ALREADY_DELETED,
+  PASSWORD_CHANGED,
 } from '../../messages'
 
 
@@ -20,12 +21,13 @@ const resolver = {
   Mutation: {
     login: async (parent, args, ctx) => {
       try {
-        console.log("hey")
-        const user = await ctx.User.findOne({ username: prop('username')(args).toLowerCase(),
+        const user = await ctx.User.findOne({ username: prop('username')(args),
           isDeleted: false })
         if (!user) return new AuthenticationError(INVALID_CREDENTIALS)
 
         const paswordMatched = await compare(prop('password')(args), user.password)
+        console.log(paswordMatched);
+        
         if (!paswordMatched) return new AuthenticationError(INVALID_CREDENTIALS)
 
         const payload = {
@@ -33,7 +35,7 @@ const resolver = {
         }
         const token = await sign(payload, propOr('secret for test', 'JWT_SECRET')(process.env))
 
-        return token
+        return {token : token, username: user.username}  
       } catch (e) {
         console.log(e)
         return new ApolloError(SERVER_ERROR, '500')
@@ -46,7 +48,7 @@ const resolver = {
         if (!hashedPassword) return new UserInputError(PASSWORD_RULES)
 
         const user = new ctx.User({
-          username: prop('username')(args).toLowerCase(),
+          username: prop('username')(args),
           password: hashedPassword,
         })
         await user.save()
@@ -54,7 +56,7 @@ const resolver = {
         const payload = { username: user.username }
         const token = await sign(payload, propOr('secret for test', 'JWT_SECRET')(process.env))
 
-        return token
+        return {token : token, username: user.username}  
       } catch (e) {
         if (e.errmsg && e.errmsg.split(':')[0] === 'E11000 duplicate key error index') {
           return new UserInputError(USERNAME_ALREADY_EXISTS)
@@ -68,7 +70,7 @@ const resolver = {
         const payload = await authenticate(ctx.token)
         if (!payload) return new AuthenticationError(UNAUTHORIZED)
 
-        const user = await ctx.User.findOne({ username: prop('username')(args).toLowerCase(), isDeleted: false })
+        const user = await ctx.User.findOne({ username: prop('username')(args), isDeleted: false })
         if (!user) return new UserInputError(USER_NOT_FOUND)
 
         const passwordMatched = await compare(prop('password')(args), user.password)
@@ -87,7 +89,7 @@ const resolver = {
         }
         const token = await sign(userPayload, propOr('secret for test', 'JWT_SECRET')(process.env))
 
-        return token
+        return PASSWORD_CHANGED
       } catch (e) {
         console.log(e)
         return new ApolloError(SERVER_ERROR, '500')

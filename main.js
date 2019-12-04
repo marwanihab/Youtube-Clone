@@ -6,7 +6,7 @@ import environment from './environment'
 import appModule from './modules/app'
 
 
-const DB_URI = pathOr('mongodb://marwan.ihab:dbadmin1@ds029675.mlab.com:29675/video-share-app', ['DB_URI'], process.env)
+const DB_URI = pathOr('', ['DB_URI'], process.env)
 
 // connecting to database server. options passed to avoid deprecation warnings
 mongoose.connect(DB_URI, { useNewUrlParser: true, useUnifiedTopology: true }, () => {

@@ -5,21 +5,27 @@ type Query {
   # empty query
   _: Boolean
 }
+type User{
+  token:String
+  username:String
+}
+
 
 type Mutation {
   addUser(
     username: String!
     password: String!
     
-  ): String
+  ): User
 
   login(
     username: String!
     password: String!
-  ): String
+  ): User
 
   editUser(
     username: String!
+    password: String!
     newPassword: String!
   ): String
 
