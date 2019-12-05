@@ -1,16 +1,20 @@
-import {Models, connectDb, disconnectDb, generateMongooseId, cleanDb } from '../db-test'
+import {Models, connectDb } from '../db-test'
 import resolver from '../../modules/user/resolvers'
 import { expect } from 'chai'
-import 'mocha'
-
+import {before, after, describe, it } from 'mocha'
 
 
 before(function (){
     connectDb()
 })
-after(function(){disconnectDb()})
 
-var loginToken = ""
+after(async function(){
+    
+    await Models.movie.deleteMany({})
+    await Models.user.deleteMany({})
+})
+
+export let loginToken = ""
 
 
 describe('Running unit tests of the user', function() {
@@ -125,7 +129,7 @@ describe('Running unit tests of the user', function() {
         })
 
         it('should fail when delete with wrong username', async() =>{
-            console.log(loginToken)
+        
             const result = await resolver.Mutation.deleteUser(
                 {}, {
                     username: 'test',  
@@ -138,8 +142,7 @@ describe('Running unit tests of the user', function() {
             expect(result + '').to.equal('UserInputError: USER not found')
         })
             
-   
+        
     })
 
-
-export const token = loginToken
+//export const token = loginToken

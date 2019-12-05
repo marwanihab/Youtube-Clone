@@ -10,16 +10,14 @@ type Movie{
 }
 
 type MoviesResponse {
-    items: [String]
+    items: [Movie]
     totalCount: Int
   }
 
 
-type Query {
-  getMovie(
-      _id: ID!
-  ): String
 
+type Query {
+ 
   getMovies(movieID: String, name:String, description:String, page: Int pageSize: Int isDeleted: Boolean): MoviesResponse
 }
 
@@ -28,7 +26,7 @@ type Mutation {
     movieID: String!,
     name: String,
     description: String
-  ): String
+  ): Movie
 
 
   deleteMovie(

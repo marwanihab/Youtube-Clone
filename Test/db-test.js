@@ -8,10 +8,10 @@ export const Models = {
 } 
 
 
-export const cleanDb = async(done) => {
+export const cleanDb = async() => {
     await Models.movie.deleteMany({});
     await Models.user.deleteMany({});
-    done()
+
 }
 
 

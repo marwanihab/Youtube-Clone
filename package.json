@@ -19,7 +19,8 @@
   },
   "scripts": {
     "start": "nodemon --exec node -r esm -r dotenv/config main.js",
-    "testUnits": "mocha -b -r esm 'Test/UnitTests/'"
+    "testUnits": "mocha -b -r esm 'Test/UnitTests/'",
+    "testIntegrations": "mocha -b -r esm 'Test/IntegrationTests/'"
   },
   "eslintConfig": {
     "extends": "react-app"

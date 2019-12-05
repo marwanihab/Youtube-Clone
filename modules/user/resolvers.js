@@ -26,8 +26,7 @@ const resolver = {
         if (!user) return new AuthenticationError(INVALID_CREDENTIALS)
 
         const paswordMatched = await compare(prop('password')(args), user.password)
-        console.log(paswordMatched);
-        
+    
         if (!paswordMatched) return new AuthenticationError(INVALID_CREDENTIALS)
 
         const payload = {
@@ -87,7 +86,7 @@ const resolver = {
         const userPayload = {
           username: user.username,
         }
-        const token = await sign(userPayload, propOr('secret for test', 'JWT_SECRET')(process.env))
+        await sign(userPayload, propOr('secret for test', 'JWT_SECRET')(process.env))
 
         return PASSWORD_CHANGED
       } catch (e) {
@@ -100,7 +99,7 @@ const resolver = {
         const payload = await authenticate(ctx.token)
         if (!payload) return new AuthenticationError(UNAUTHORIZED)
 
-        const user = await ctx.User.findOne({ username: prop('username')(args), isDeleted: false })
+        const user = await ctx.User.findOne({ username: prop('username')(args) })
         if (!user) return new UserInputError(USER_NOT_FOUND)
         if (user.isDeleted) return new UserInputError(USER_ALREADY_DELETED)
 

@@ -1,23 +1,28 @@
 import appModule from '../../modules/app'
 import { createTestClient } from 'apollo-server-testing'
 import { ApolloServer } from 'apollo-server'
-import {Models, connectDb, disconnectDb } from '../db-test'
+import { Models, connectDb } from '../db-test'
 import { expect } from 'chai'
 import { gql } from 'apollo-server'
-import { authenticate, hashPassword } from '../../auth'
-import 'mocha'
+import { hashPassword } from '../../auth'
+import {before, after, it, describe} from 'mocha'
 
-const server = new ApolloServer({
+export const server = new ApolloServer({
     schema:  appModule.schema,
     context: () => ({ token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3RVc2VyIiwiaWF0IjoxNTc1NDI2NzI2fQ.kWQQdaUWlUmY40dkZ4igKQ0Ml_BwrLVdoQebkqsZOVU' })
     }) 
 
-const { query, mutate } = createTestClient(server)  
+export const { query, mutate } = createTestClient(server)  
   
 before(function (){
     connectDb()
 })
-after(function(){disconnectDb()})
+after(async function(){
+  
+  await Models.movie.deleteMany({})
+  await Models.user.deleteMany({})
+
+})
 
 describe('Running integration tests of the user', function() {
     this.timeout(15000)
@@ -212,7 +217,7 @@ describe('Running integration tests of the user', function() {
  
       const mutation = gql `
       mutation deleteUser{
-         deleteUser(username: "testUserDelete")
+         deleteUser(username: "testUserDeleteDel")
            
          }
       `
@@ -221,10 +226,7 @@ describe('Running integration tests of the user', function() {
       )         
           
       expect(res.errors[0].message).to.equal('USER not found')
-   
-      
+  
      })
-
-
 })
     

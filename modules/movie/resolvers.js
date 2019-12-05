@@ -6,26 +6,13 @@ import {
   MOVIE_ALREADY_DELETED,
   UNAUTHORIZED,
   SERVER_ERROR,
+  MOVIE_ID_ALREADY_EXISTS,
 } from '../../messages'
 
 
 
 const resolvers = {
   Query: {
-    getMovie: async (parent, args, ctx) => {
-      try {
-        const payload = await authenticate(ctx.token)
-        if (!payload) return new AuthenticationError(UNAUTHORIZED)
-
-        const movie = await ctx.Movie.findOne({ _id: prop('_id')(args), isDeleted: false })
-        if (!movie) return new UserInputError(MOVIE_NOT_FOUND)
-
-        return movie.movieID
-      } catch (e) {
-        console.log(e)
-        return new ApolloError(SERVER_ERROR, '500')
-      }
-    },
     getMovies: async (parent, args, ctx) => {
       try {
         const payload = await authenticate(ctx.token)
@@ -45,8 +32,8 @@ const resolvers = {
           : { $or: orFilter, isDeleted: propOr(false, 'isDeleted')(args) }
 
         const movies = await ctx.Movie.find(match).skip(skip).limit(limit)
-
         const count = await ctx.Movie.count(match)
+        
 
         return { totalCount: count, items: movies }
       } catch (e) {
@@ -68,8 +55,11 @@ const resolvers = {
         })
         await movie.save()
 
-        return movie.movieID
+        return movie
       } catch (e) {
+        if (e.errmsg && e.errmsg.split(':')[0] === 'E11000 duplicate key error index') {
+          return new UserInputError(MOVIE_ID_ALREADY_EXISTS)
+        }
         console.log(e)
         return new ApolloError(SERVER_ERROR, '500')
       }
@@ -80,14 +70,14 @@ const resolvers = {
           const payload = await authenticate(ctx.token)
           if (!payload) return new AuthenticationError(UNAUTHORIZED)
 
-          const movie = await ctx.Movie.findOne({ _id: prop('_id')(args), isDeleted: false })
+          const movie = await ctx.Movie.findOne({ movieID: prop('movieID')(args)})
           if (!movie) return new UserInputError(MOVIE_NOT_FOUND)
           if(movie.isDeleted) return new UserInputError(MOVIE_ALREADY_DELETED)
           
           movie.isDeleted = true
           await movie.save()
 
-          return movie.movieID
+          return movie._id
         }
         catch(e){
             console.log(e)
