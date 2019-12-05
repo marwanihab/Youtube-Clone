@@ -7,28 +7,6 @@ export const Models = {
     user: User
 } 
 
-// export const _ensureIndexesRecursive = async(modelNames, currentIndex, done) => {
-//     if (currentModelIndex < modelNames.length) {
-//         var model = mongoose.model(modelNames[currentIndex++]);
-//         model.ensureIndexes(function(error) {
-//             if (error) {
-//                 return done(error);
-//             }
-//             _ensureIndexesRecursive(modelNames, currentIndex, done);
-//         });
-//     }
-//     else {
-//         done();
-//     }
-// }
-// export const CleanDatabase= async(done) => {
-   
-//     mongoose.connection.db.dropDatabase();
-//     var modelNames = mongoose.modelNames();
-//     _ensureIndexesRecursive(modelNames, 0, done);
-//     done()
-
-// }
 
 export const cleanDb = async(done) => {
     await Models.movie.deleteMany({});
