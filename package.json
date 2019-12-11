@@ -19,7 +19,7 @@
     "ramda": "^0.26.1"
   },
   "scripts": {
-    "start": "nodemon --exec node -r esm -r dotenv/config main.js",
+    "start": "node -r esm -r dotenv/config main.js",
     "testUnits": "mocha -b -r esm 'Test/UnitTests/'",
     "testIntegrations": "mocha -b -r esm 'Test/IntegrationTests/'"
   },
