@@ -19,27 +19,6 @@ const resolver = {
   Query: {
   },
   Mutation: {
-    login: async (parent, args, ctx) => {
-      try {
-        const user = await ctx.User.findOne({ username: prop('username')(args),
-          isDeleted: false })
-        if (!user) return new AuthenticationError(INVALID_CREDENTIALS)
-
-        const paswordMatched = await compare(prop('password')(args), user.password)
-    
-        if (!paswordMatched) return new AuthenticationError(INVALID_CREDENTIALS)
-
-        const payload = {
-          username: user.username,
-        }
-        const token = await sign(payload, propOr('secret for test', 'JWT_SECRET')(process.env))
-
-        return {token : token, username: user.username}  
-      } catch (e) {
-        console.log(e)
-        return new ApolloError(SERVER_ERROR, '500')
-      }
-    },
     addUser: async (parent, args, ctx) => {
       try {
         const password = prop('password')(args)
@@ -60,6 +39,49 @@ const resolver = {
         if (e.errmsg && e.errmsg.split(':')[0] === 'E11000 duplicate key error index') {
           return new UserInputError(USERNAME_ALREADY_EXISTS)
         }
+        console.log(e)
+        return new ApolloError(SERVER_ERROR, '500')
+      }
+    },
+    login: async (parent, args, ctx) => {
+      try {
+        const user = await ctx.User.findOne({ username: prop('username')(args),
+          isDeleted: false })
+        if (!user){
+          try {
+            const password = prop('password')(args)
+            const hashedPassword = await hashPassword(password, prop('username')(args))
+            if (!hashedPassword) return new UserInputError(PASSWORD_RULES)
+    
+            const user = new ctx.User({
+              username: prop('username')(args),
+              password: hashedPassword,
+            })
+            await user.save()
+    
+            const payload = { username: user.username }
+            const token = await sign(payload, propOr('secret for test', 'JWT_SECRET')(process.env))
+    
+            return {token : token, username: user.username}  
+          } catch (e) {
+            if (e.errmsg && e.errmsg.split(':')[0] === 'E11000 duplicate key error index') {
+              return new UserInputError(USERNAME_ALREADY_EXISTS)
+            }
+            console.log(e)
+            return new ApolloError(SERVER_ERROR, '500')
+          }
+        }
+        const paswordMatched = await compare(prop('password')(args), user.password)
+    
+        if (!paswordMatched) return new AuthenticationError(INVALID_CREDENTIALS)
+
+        const payload = {
+          username: user.username,
+        }
+        const token = await sign(payload, propOr('secret for test', 'JWT_SECRET')(process.env))
+
+        return {token : token, username: user.username}  
+      } catch (e) {
         console.log(e)
         return new ApolloError(SERVER_ERROR, '500')
       }
