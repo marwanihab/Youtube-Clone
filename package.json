@@ -45,7 +45,7 @@
     "babel-core": "^6.26.3",
     "babel-polyfill": "^6.26.0",
     "jest": "^24.9.0",
-    "mocha": "^6.2.2",
+    "mocha": "^10.2.0",
     "nodemon": "^2.0.1"
   }
 }
